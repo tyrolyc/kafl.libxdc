@@ -488,6 +488,7 @@ static inline void inform_disassembler_target_ip(disassembler_t* self, disassemb
 }
 
 #define MAX_LOOP_COUNT 80000
+#define MAX_TRACE_CACHE_SIZE 2000000
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -640,6 +641,10 @@ __attribute__((hot)) disas_result_t trace_disassembler(disassembler_t* self, uin
 
 	*failed_page = 0;
 
+	if (unlikely(kh_size(self->trace_cache->lookup) > MAX_TRACE_CACHE_SIZE)) {
+		reset_trace_cache(self);
+	}
+	
 	if(unlikely(self->trace_mode)){
 			return trace_disassembler_loop(self, &entry_point, limit, tnt_cache_state, NULL, NULL, failed_page, mode, true);
 	}
